@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movies_app/models/models.dart';
 import 'package:provider/provider.dart';
 import 'package:movies_app/providers/fpl_provider.dart';
+import 'package:movies_app/widgets/widgets.dart';
 
 class DetailsScreen extends StatelessWidget {
   @override
@@ -30,32 +31,47 @@ class DetailsScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(args.name ?? 'Team Details'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20),
+        body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Image.network(
-                  args.fullBadgePath,
-                  height: 150,
-                  errorBuilder: (_, __, ___) =>
-                      Image.asset('assets/no-image.jpg', height: 150),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Image.network(
+                        args.fullBadgePath,
+                        height: 150,
+                        errorBuilder: (_, __, ___) =>
+                            Image.asset('assets/no-image.jpg', height: 150),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      '${args.name ?? ''} (${args.shortName ?? ''})',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 15),
+                    Text('Squad Players: ${teamPlayers.length}', style: style),
+                    const SizedBox(height: 8),
+                    Text('Total FPL Points: $totalPoints', style: style),
+                    const SizedBox(height: 8),
+                    Text('Total Goals Scored: $totalGoals', style: style),
+                    const SizedBox(height: 8),
+                    Text('Total Assists: $totalAssists', style: style),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              Text(
-                '${args.name ?? ''} (${args.shortName ?? ''})',
-                style: Theme.of(context).textTheme.headlineSmall,
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Squad',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
               ),
-              const SizedBox(height: 15),
-              Text('Squad Players: ${teamPlayers.length}', style: style),
-              const SizedBox(height: 8),
-              Text('Total FPL Points: $totalPoints', style: style),
-              const SizedBox(height: 8),
-              Text('Total Goals Scored: $totalGoals', style: style),
-              const SizedBox(height: 8),
-              Text('Total Assists: $totalAssists', style: style),
+              CastingCards(teamId: args.id ?? 0),
             ],
           ),
         ),
