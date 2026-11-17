@@ -12,18 +12,7 @@ class DetailsScreen extends StatelessWidget {
     // If the user tapped a Team in CardSwiper
     if (args is Team) {
       final fplProvider = Provider.of<FplProvider>(context, listen: false);
-      final teamPlayers =
-          fplProvider.allPlayers.where((p) => p.team == args.id).toList();
-
-      int totalPoints = 0;
-      int totalGoals = 0;
-      int totalAssists = 0;
-
-      for (var p in teamPlayers) {
-        totalPoints += p.totalPoints ?? 0;
-        totalGoals += p.goalsScored ?? 0;
-        totalAssists += p.assists ?? 0;
-      }
+      final teamStats = fplProvider.getTeamStats(args.id ?? 0);
 
       final style = Theme.of(context).textTheme.titleMedium;
 
@@ -54,13 +43,17 @@ class DetailsScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 15),
-                    Text('Squad Players: ${teamPlayers.length}', style: style),
+                    Text('Squad Players: ${teamStats['squadSize']}',
+                        style: style),
                     const SizedBox(height: 8),
-                    Text('Total FPL Points: $totalPoints', style: style),
+                    Text('Total FPL Points: ${teamStats['points']}',
+                        style: style),
                     const SizedBox(height: 8),
-                    Text('Total Goals Scored: $totalGoals', style: style),
+                    Text('Total Goals Scored: ${teamStats['goals']}',
+                        style: style),
                     const SizedBox(height: 8),
-                    Text('Total Assists: $totalAssists', style: style),
+                    Text('Total Assists: ${teamStats['assists']}',
+                        style: style),
                   ],
                 ),
               ),
@@ -127,6 +120,7 @@ class _CustomAppBar extends StatelessWidget {
         background: FadeInImage(
           placeholder: AssetImage('assets/loading.gif'),
           image: NetworkImage(player.fullPicturePath),
+          imageErrorBuilder: (_, __, ___) => Image.asset('assets/no-image.jpg'),
           fit: BoxFit.cover,
         ),
       ),

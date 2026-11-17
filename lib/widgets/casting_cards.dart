@@ -11,8 +11,7 @@ class CastingCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fplProvider = Provider.of<FplProvider>(context, listen: false);
-    final squad =
-        fplProvider.allPlayers.where((p) => p.team == teamId).toList();
+    final squad = fplProvider.getPlayersByTeam(teamId);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 30, top: 10),

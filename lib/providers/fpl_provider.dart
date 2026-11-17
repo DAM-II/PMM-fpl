@@ -12,25 +12,65 @@ class FplProvider extends ChangeNotifier {
   List<Player> defenders = [];
   List<Player> goalkeepers = [];
 
+  bool isLoading = true;
+  String? errorMessage;
+
   FplProvider() {
     getPlayers();
   }
 
-  getPlayers() async {
-    var url = Uri.https(_baseUrl, '/api/bootstrap-static/');
-    final result = await http.get(url);
+  Future<void> getPlayers() async {
+    try {
+      final url = Uri.https(_baseUrl, '/api/bootstrap-static/');
+      final result = await http.get(url);
 
-    final fplResponse = FplResponse.fromJson(result.body);
+      if (result.statusCode != 200) {
+        errorMessage = 'Error HTTP: ${result.statusCode}';
+        isLoading = false;
+        notifyListeners();
+        return;
+      }
 
-    teams = fplResponse.teams ?? [];
-    allPlayers = fplResponse.elements ?? [];
+      final fplResponse = FplResponse.fromJson(result.body);
 
-    // Filter players by position (1 = GK, 2 = DEF, 3 = MID, 4 = FWD)
-    goalkeepers = allPlayers.where((p) => p.elementType == 1).toList();
-    defenders = allPlayers.where((p) => p.elementType == 2).toList();
-    midfielders = allPlayers.where((p) => p.elementType == 3).toList();
-    forwards = allPlayers.where((p) => p.elementType == 4).toList();
+      teams = fplResponse.teams ?? [];
+      allPlayers = fplResponse.elements ?? [];
 
-    notifyListeners();
+      goalkeepers = allPlayers.where((p) => p.elementType == 1).toList();
+      defenders = allPlayers.where((p) => p.elementType == 2).toList();
+      midfielders = allPlayers.where((p) => p.elementType == 3).toList();
+      forwards = allPlayers.where((p) => p.elementType == 4).toList();
+
+      isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      errorMessage = 'No s\'han pogut carregar les dades';
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  List<Player> getPlayersByTeam(int teamId) {
+    return allPlayers.where((p) => p.team == teamId).toList();
+  }
+
+  Map<String, int> getTeamStats(int teamId) {
+    final squad = getPlayersByTeam(teamId);
+    int points = 0;
+    int goals = 0;
+    int assists = 0;
+
+    for (var p in squad) {
+      points += p.totalPoints ?? 0;
+      goals += p.goalsScored ?? 0;
+      assists += p.assists ?? 0;
+    }
+
+    return {
+      'squadSize': squad.length,
+      'points': points,
+      'goals': goals,
+      'assists': assists,
+    };
   }
 }
